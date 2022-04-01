@@ -46,8 +46,38 @@ export default class GameScene extends Phaser.Scene
         
         slot.add([ cherry, banana, blackberry ])
 
-        // create ui elements
-        this.spin = this.add.sprite(centerX, centerY + 200, 'spin').setScale(0.5)
-        this.bigwin = this.add.sprite(centerX, centerY - 170, 'bigwin').setScale(0.5)
+        // setup spin button
+        this.spin = this.add.sprite(centerX, centerY + 200, 'spin')
+            .setScale(0.5)
+            .setInteractive()
+            .on('pointerdown', () => this.startSpin())
+        
+        // setup bigwin text
+        this.bigwin = this.add.sprite(centerX, centerY - 170, 'bigwin')
+            .setScale(0.5)
+        this.bigwin.visible = false
+    }
+
+    startSpin()
+    {
+        this.bigwin.visible = false
+
+        // disable spin button until the spin process ends
+        this.spin.disableInteractive()
+        this.spin.setTint(0x808080)
+
+        setTimeout(() => { 
+            this.endSpin()
+        }, 1000)
+    }
+
+    endSpin()
+    {
+        //TODO: only show bigwin if there are 3 matching symbols
+        this.bigwin.visible = true
+        
+        // reset spin button
+        this.spin.clearTint()
+            .setInteractive()
     }
 }
