@@ -36,6 +36,18 @@ export default class GameScene extends Phaser.Scene
         this.background.displayWidth = this.sys.canvas.width
         this.background.displayHeight = this.sys.canvas.height
 
-        // this.add.image(centerX, centerY, 'bananas')
+        // setup symbol container
+        let slot = this.add.container(centerX, centerY)
+
+        // add symbols
+        let banana = this.add.sprite(-190, 0, 'banana').setScale(0.5)
+        let blackberry = this.add.sprite(0, 0, 'blackberry').setScale(0.5)
+        let cherry = this.add.sprite(200, 0, 'cherry').setScale(0.5)
+        
+        slot.add([ cherry, banana, blackberry ])
+
+        // create ui elements
+        this.spin = this.add.sprite(centerX, centerY + 200, 'spin').setScale(0.5)
+        this.bigwin = this.add.sprite(centerX, centerY - 170, 'bigwin').setScale(0.5)
     }
 }
