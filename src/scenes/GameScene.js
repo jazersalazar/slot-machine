@@ -53,9 +53,13 @@ export default class GameScene extends Phaser.Scene
             this.maskReel(this.reels[x])
 
             for (let y = 0; y < this.slots[x].length; y++) {
-                let symbol = this.add.sprite(0, y * this.symbolPosY, this.slots[x][y]).setScale(0.5)
+                let symbol = this.add.sprite(0, y * -this.symbolPosY, this.slots[x][y]).setScale(0.5)
                 this.reels[x].add(symbol)
             }
+
+            // dummy replicate of first symbol for seamless transition
+            let dummy_symbol = this.add.sprite(0, this.slots[x].length * -this.symbolPosY, this.slots[x][0]).setScale(0.5)
+            this.reels[x].add(dummy_symbol)
         }
 
         // setup spin button
@@ -98,7 +102,7 @@ export default class GameScene extends Phaser.Scene
                 this.reels[x].duration = duration
             }
 
-            this.reels[x].y = 0
+            this.reels[x].y = 260
 
             this.reels[x].spin = this.time.addEvent({
                 delay: 100,
@@ -109,7 +113,8 @@ export default class GameScene extends Phaser.Scene
             
             this.reels[x].tween = this.tweens.add({
                 targets: this.reels[x],
-                y: -510,
+                y: 1460,
+                duration: 500,
                 repeat: -1,
             })
         }
@@ -131,9 +136,10 @@ export default class GameScene extends Phaser.Scene
             reel.spin.remove()
             reel.tween.stop()
 
+            let finalPositon = this.centerY + (reel.position * this.symbolPosY)
             reel.tween = this.tweens.add({
                 targets: reel,
-                y: this.centerY - (reel.position * this.symbolPosY),
+                y: finalPositon,
                 onComplete: () => {
                     // call the endSpin if the last reels has been stopped
                     if (index == this.reels.length - 1) {
