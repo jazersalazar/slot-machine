@@ -2,7 +2,7 @@
 A simple slot machine game built with <a href="https://github.com/ourcade/phaser3-parcel-template" target="_blank">Phaser 3 + Parcel Template</a>
 
 ## Live Demo:
-<a href="" target="_blank">Slot Machine - Live Demo</a>
+<a href="https://o690.com/slot-machine/" target="_blank">Slot Machine - Live Demo</a>
 ## Prerequisites
 <ul>
   <li><a href="https://nodejs.org/en/" target="_blank">NodeJS</a></li>
