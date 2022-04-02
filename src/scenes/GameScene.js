@@ -35,9 +35,9 @@ export default class GameScene extends Phaser.Scene
     create()
     {
         // get the center position of the scene
-        let centerX = this.cameras.main.width / 2
-        let centerY = this.cameras.main.height / 2
-        this.background = this.add.image(centerX, centerY, 'background')
+        this.centerX = this.cameras.main.width / 2
+        this.centerY = this.cameras.main.height / 2
+        this.background = this.add.image(this.centerX, this.centerY, 'background')
 
         // make the background image cover the scene size 
         this.background.displayWidth = this.sys.canvas.width
@@ -46,26 +46,38 @@ export default class GameScene extends Phaser.Scene
         // setup the reels
         let reelPosX = [-191, 0, 200]
         for (let x = 0; x < this.slots.length; x++) {
-            this.reels[x] = this.add.container(centerX + reelPosX[x], centerY)
+            this.reels[x] = this.add.container(this.centerX + reelPosX[x], this.centerY)
             this.reels[x].symbols = this.slots[x]
             this.reels[x].position = 0
+            this.maskReel(this.reels[x])
 
             for (let y = 0; y < this.slots[x].length; y++) {
-                let symbol = this.add.sprite(0, 0, this.slots[x][y]).setScale(0.5)
+                let symbol = this.add.sprite(0, y * 130, this.slots[x][y]).setScale(0.5)
                 this.reels[x].add(symbol)
             }
         }
 
         // setup spin button
-        this.spinBtn = this.add.sprite(centerX, centerY + 200, 'spin')
+        this.spinBtn = this.add.sprite(this.centerX, this.centerY + 200, 'spin')
             .setScale(0.5)
             .setInteractive()
             .on('pointerdown', () => this.startSpin())
         
         // setup bigwin text
-        this.bigwinTxt = this.add.sprite(centerX, centerY - 170, 'bigwin')
+        this.bigwinTxt = this.add.sprite(this.centerX, this.centerY, 'bigwin')
             .setScale(0.5)
-        this.bigwinTxt.visible = false
+            .setAlpha(0)
+    }
+
+    maskReel(reel)
+    {
+        const shape = this.add.graphics()
+        shape.fillStyle(0xffffff)
+        shape.beginPath()
+        shape.fillRect(reel.x - 93, reel.y - 125, 180, 230);
+        shape.depth = -1
+        const mask = shape.createGeometryMask()
+        reel.setMask(mask)  
     }
 
     startSpin()
@@ -87,12 +99,21 @@ export default class GameScene extends Phaser.Scene
                 this.reels[x].duration = duration
             }
 
+            this.reels[x].y = 0
+
             this.reels[x].spin = this.time.addEvent({
                 delay: 100,
                 callback: () => { this.spin(x) },
                 callbackScope: this,
                 loop: true
-            })   
+            })
+            
+            this.reels[x].tween = this.tweens.add({
+                targets: this.reels[x],
+                y: -510,
+                repeat: -1,
+                yoyo: false
+            })
         }
     }
 
@@ -110,7 +131,7 @@ export default class GameScene extends Phaser.Scene
         reel.duration -= reel.spin.delay / 1000
         if (reel.duration <= 0) {
             reel.spin.remove()
-            
+            reel.tween.stop()
             // call the endSpin if the last reels has been stopped
             if (index == this.reels.length - 1) {
                 this.endSpin()
@@ -118,7 +139,7 @@ export default class GameScene extends Phaser.Scene
         }
 
         // apply the value changes to the actual objectj
-        this.reels[index] = reel
+        this.reels[index] = reel 
     }
 
     endSpin() {
@@ -131,6 +152,14 @@ export default class GameScene extends Phaser.Scene
         if (symbols[0] === symbols[1] && symbols[1] === symbols[2]) {
             this.bigwinTxt.visible = true
         }
+        this.tweens.add({
+            targets: this.bigwinTxt,
+            y: 100,
+            duration: 2000,
+            alpha: 1,
+            yoyo: true,
+            hold: 1000
+        });
 
         // reset spin button
         this.spinBtn.clearTint()
