@@ -38,6 +38,7 @@ export default class GameScene extends Phaser.Scene
         this.centerX = this.cameras.main.width / 2
         this.centerY = this.cameras.main.height / 2
         this.background = this.add.image(this.centerX, this.centerY, 'background')
+        this.symbolPosY = 200
 
         // make the background image cover the scene size 
         this.background.displayWidth = this.sys.canvas.width
@@ -52,7 +53,7 @@ export default class GameScene extends Phaser.Scene
             this.maskReel(this.reels[x])
 
             for (let y = 0; y < this.slots[x].length; y++) {
-                let symbol = this.add.sprite(0, y * 130, this.slots[x][y]).setScale(0.5)
+                let symbol = this.add.sprite(0, y * this.symbolPosY, this.slots[x][y]).setScale(0.5)
                 this.reels[x].add(symbol)
             }
         }
@@ -82,14 +83,12 @@ export default class GameScene extends Phaser.Scene
 
     startSpin()
     {
-        this.bigwinTxt.visible = false
-
         // disable spin button until the spin process ends
         this.spinBtn.disableInteractive()
         this.spinBtn.setTint(0x808080)
 
         // intialize stop time for the reels
-        let duration = Phaser.Math.FloatBetween(0, 3)
+        let duration = Phaser.Math.FloatBetween(1, 3)
 
         for (let x = 0; x < this.reels.length; x++) {
             if (x > 0) {
@@ -112,7 +111,6 @@ export default class GameScene extends Phaser.Scene
                 targets: this.reels[x],
                 y: -510,
                 repeat: -1,
-                yoyo: false
             })
         }
     }
@@ -132,10 +130,17 @@ export default class GameScene extends Phaser.Scene
         if (reel.duration <= 0) {
             reel.spin.remove()
             reel.tween.stop()
-            // call the endSpin if the last reels has been stopped
-            if (index == this.reels.length - 1) {
-                this.endSpin()
-            }
+
+            reel.tween = this.tweens.add({
+                targets: reel,
+                y: this.centerY - (reel.position * this.symbolPosY),
+                onComplete: () => {
+                    // call the endSpin if the last reels has been stopped
+                    if (index == this.reels.length - 1) {
+                        this.endSpin()
+                    }
+                }
+            })
         }
 
         // apply the value changes to the actual objectj
@@ -150,16 +155,15 @@ export default class GameScene extends Phaser.Scene
 
         // display bigwin text
         if (symbols[0] === symbols[1] && symbols[1] === symbols[2]) {
-            this.bigwinTxt.visible = true
+            this.tweens.add({
+                targets: this.bigwinTxt,
+                y: 100,
+                duration: 500,
+                alpha: 1,
+                yoyo: true,
+                hold: 2000
+            });
         }
-        this.tweens.add({
-            targets: this.bigwinTxt,
-            y: 100,
-            duration: 2000,
-            alpha: 1,
-            yoyo: true,
-            hold: 1000
-        });
 
         // reset spin button
         this.spinBtn.clearTint()
