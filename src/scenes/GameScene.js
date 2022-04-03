@@ -8,6 +8,7 @@ export default class GameScene extends Phaser.Scene
         ['blackberry', 'banana', 'cherry', 'banana', 'blackberry', 'cherry']
     ]
     reels = []
+    toolBtn = []
 
     constructor()
     {
@@ -60,6 +61,16 @@ export default class GameScene extends Phaser.Scene
             // dummy replicate of first symbol for seamless transition
             let dummy_symbol = this.add.sprite(0, this.slots[x].length * -this.symbolPosY, this.slots[x][0]).setScale(0.5)
             this.reels[x].add(dummy_symbol)
+
+            // create buttons for the cheat tool
+            let symbolBtn = this.add.container(-72, -13)
+            let tool_input = this.add.sprite(0, 0, 'tool_input')
+                .setScale(0.5)
+                .setInteractive()
+                .on('pointerdown', () => this.toggleToolBtn(this.toolBtn[x]))
+            let tool_text = this.add.text(-5, -8, '1')
+            this.toolBtn[x] = symbolBtn.add(tool_input) 
+            this.toolBtn[x] = symbolBtn.add(tool_text) 
         }
 
         // setup spin button
@@ -72,6 +83,25 @@ export default class GameScene extends Phaser.Scene
         this.bigwinTxt = this.add.sprite(this.centerX, this.centerY, 'bigwin')
             .setScale(0.5)
             .setAlpha(0)
+        
+        // setup cheat tool
+        this.tool = this.add.container(115, -40)
+        let toolBg = this.add.sprite(0, 0, 'tool_background').setScale(0.5)
+        let toolsTxt = this.add.text(-87, 42, 'Tools').setFontSize(12)
+        let toolsTitle = this.add.text(-97, -47, 'SYMBOL POSITION IN THE REEL').setFontSize(12)
+        let arrow = this.add.sprite(-27, 50, 'arrow').setScale(0.5)
+            .setInteractive()
+            .on('pointerdown', () => this.toggleTool())
+        
+        this.tool.add(toolBg)
+        this.tool.add(toolsTxt)
+        this.tool.add(toolsTitle)
+        this.tool.add(arrow)
+
+        for (let x = 0; x < this.toolBtn.length; x++) {
+            this.tool.add(this.toolBtn[x])
+            this.toolBtn[x].x = this.toolBtn[x].x + (x * 73)
+        }
     }
 
     maskReel(reel)
@@ -153,7 +183,8 @@ export default class GameScene extends Phaser.Scene
         this.reels[index] = reel 
     }
 
-    endSpin() {
+    endSpin()
+    {
         let symbols = []
         for (let x = 0; x < this.reels.length; x++) {
             symbols[x] = this.reels[x].symbols[this.reels[x].position]
@@ -174,5 +205,30 @@ export default class GameScene extends Phaser.Scene
         // reset spin button
         this.spinBtn.clearTint()
             .setInteractive()
+    }
+
+    toggleTool()
+    {
+        this.tweens.add({
+            targets: this.tool,
+            y: this.tool.y == -40 ? 65 : -40,
+            duration: 300
+        })
+
+        this.tweens.add({
+            targets: this.tool.list[3],
+            angle: this.tool.y == -40 ? 180 : 0,
+            repeat: 0,
+            duration: 300
+        })
+    }
+
+    toggleToolBtn(button)
+    {
+        button.list[1].text++
+
+        if (button.list[1].text > 6) {
+            button.list[1].text = 1
+        }
     }
 }
