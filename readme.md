@@ -21,8 +21,14 @@ Start development server
 npm run start
 ```
 
+## How to Cheat
+- Open the tools by clicking the dropdown arrow
+- Set the symbol value by clicking the symbol position button
+- Set the symbol position into "| 1 | 2 | 3 |"
+- Click the Spin
+- Wait for the "Big Win"!
+
 ## TODOs
 <ul>
-  <li>Cheat Tool</li>
-  <li>Final Spin Behaviour</li>
+  <li>Final Spin Behaviour Improvement</li>
 </ul>

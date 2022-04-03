@@ -9,6 +9,7 @@ export default class GameScene extends Phaser.Scene
     ]
     reels = []
     toolBtn = []
+    cheat = false
 
     constructor()
     {
@@ -150,7 +151,7 @@ export default class GameScene extends Phaser.Scene
         }
     }
 
-    spin(index) 
+    spin(index)
     {
         let reel = this.reels[index]
 
@@ -158,6 +159,11 @@ export default class GameScene extends Phaser.Scene
         reel.position++
         if (reel.position >= reel.symbols.length) {
             this.reels[index].position = 0
+        }
+
+        // override position if cheat is enabled
+        if (this.cheat) {
+            reel.position = this.toolBtn[index].list[1].text - 1
         }
 
         // stop the event once the duration down to 0
@@ -211,16 +217,18 @@ export default class GameScene extends Phaser.Scene
     {
         this.tweens.add({
             targets: this.tool,
-            y: this.tool.y == -40 ? 65 : -40,
+            y: this.cheat ? -40 : 65,
             duration: 300
         })
 
         this.tweens.add({
             targets: this.tool.list[3],
-            angle: this.tool.y == -40 ? 180 : 0,
+            angle: this.cheat ? 0 : 180,
             repeat: 0,
             duration: 300
         })
+
+        this.cheat = !this.cheat
     }
 
     toggleToolBtn(button)
